@@ -4,10 +4,10 @@ import matplotlib.pyplot as plt
 def graph_personajes_por_planeta():
     characters_df = pd.read_csv('starwars/csv/characters.csv')
 
-    # Count the number of characters born on each planet
+    # Contar cantidad de personas por planeta
     planet_birth_counts = characters_df['homeworld'].value_counts()
 
-    # Generate the bar graph
+    # Generar el grafico
     plt.figure(figsize=(12, 8))
     planet_birth_counts.plot(kind='bar', color='skyblue')
     plt.title('Numero de personajes nacidos en cada planeta')
@@ -102,5 +102,5 @@ def ship_statistics():
     print(stats_df)
 
 
-ship_statistics()
+
 
