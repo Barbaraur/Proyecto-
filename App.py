@@ -1,10 +1,11 @@
 import requests as rq
-import json
 from Pelicula import Pelicula
 from Especie import Especie
-import os
+from Planeta import Planeta
 
 peliculas = []
+especies = []
+planetas = []
 
 def get_data():
     url = "https://www.swapi.tech/api/"
@@ -24,16 +25,23 @@ def get_films():
     for film in data['result']:
         pelicula = Pelicula(film['properties']['title'], film['properties']['episode_id'], film['properties']['release_date'], film['properties']['opening_crawl'], film['properties']['director'])
         peliculas.append(pelicula)
+    return data['result']
 
 def show_films():
     for pelicula in peliculas:
         print(pelicula)
 
-def get_species():
+def get_species(films_data):
     url = "https://www.swapi.tech/api/species"
     response = rq.get(url)
     data = response.json()
-    especies = []
+
+    species_films = {species['url']: [] for species in data['results']}
+
+    for film in films_data:
+        for species_url in film['properties']['species']:
+            if species_url in species_films:
+                species_films[species_url].append(film['properties']['title'])
 
     for especie in data['results']:
         especie_detail_url = especie['url']
@@ -41,14 +49,9 @@ def get_species():
         detail_data = response_detail.json()
         properties = detail_data['result']['properties']
 
-        # Get homeworld name
         homeworld_name = get_name_from_url(properties['homeworld']) if properties['homeworld'] else 'Unknown'
-
-        # Get names of people
         people_names = [get_name_from_url(person) for person in properties.get('people', [])]
-
-        # Get names of films
-        film_names = [get_name_from_url(film) for film in properties.get('films', [])]
+        film_names = species_films[especie_detail_url]
 
         especie_obj = Especie(
             especie['name'],
@@ -62,10 +65,66 @@ def get_species():
 
         especies.append(especie_obj)
 
-    return especies
 def show_species():
-    especies = get_species()
     for especie in especies:
         print(especie)
 
-show_species()
+def get_planets(films_data):
+    url = "https://www.swapi.tech/api/planets"
+    response = rq.get(url)
+    data = response.json()
+
+    planet_films = {planet['url']: [] for planet in data['results']}
+    planet_residents = {planet['url']: [] for planet in data['results']}
+
+    for film in films_data:
+        for planet_url in film['properties']['planets']:
+            if planet_url in planet_films:
+                planet_films[planet_url].append(film['properties']['title'])
+
+    people_url = "https://www.swapi.tech/api/people"
+    response_people = rq.get(people_url)
+    people_data = response_people.json()
+
+    for person in people_data['results']:
+        person_detail_url = person['url']
+        response_person_detail = rq.get(person_detail_url)
+        person_detail_data = response_person_detail.json()
+        person_properties = person_detail_data['result']['properties']
+
+        homeworld_url = person_properties['homeworld']
+        if homeworld_url in planet_residents:
+            planet_residents[homeworld_url].append(person_properties['name'])
+
+    for planeta in data['results']:
+        planeta_detail_url = planeta['url']
+        response2 = rq.get(planeta_detail_url)
+        detail_data = response2.json()
+        properties = detail_data['result']['properties']
+
+        films = planet_films[planeta_detail_url]
+        residents = planet_residents[planeta_detail_url]
+
+        planeta_obj = Planeta(
+            properties['name'],
+            properties['orbital_period'],
+            properties['rotation_period'],
+            properties['population'],
+            properties['climate'],
+            films,
+            residents
+        )
+
+        planetas.append(planeta_obj)
+
+def show_planets():
+    for planeta in planetas:
+        print(planeta)
+
+if __name__ == "__main__":
+    films_data = get_films()
+    show_films()
+    get_species(films_data)
+    show_species()
+    get_planets(films_data)
+    show_planets()
