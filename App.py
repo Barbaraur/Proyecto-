@@ -4,22 +4,26 @@ from Especie import Especie
 from Planeta import Planeta
 from Personaje import Personaje
 
+# Listas para almacenar objetos de películas, especies, planetas y personajes
 peliculas = []
 especies = []
 planetas = []
 personajes = []
 
+# Función para obtener datos de la API principal
 def get_data():
     url = "https://www.swapi.tech/api/"
     response = rq.get(url)
     data = response.json()
     return data
 
+# Función para obtener el nombre desde una URL específica
 def get_name_from_url(url):
     response = rq.get(url)
     data = response.json()
     return data['result']['properties']['name']
 
+# Función para obtener y almacenar datos de películas
 def get_films():
     url = "https://www.swapi.tech/api/films"
     response = rq.get(url)
@@ -29,10 +33,12 @@ def get_films():
         peliculas.append(pelicula)
     return data['result']
 
+# Función para mostrar las películas almacenadas
 def show_films():
     for pelicula in peliculas:
         print(pelicula)
 
+# Función para obtener y almacenar datos de especies
 def get_species(films_data):
     url = "https://www.swapi.tech/api/species"
     response = rq.get(url)
@@ -69,10 +75,12 @@ def get_species(films_data):
 
     return data['results']
 
+# Función para mostrar las especies almacenadas
 def show_species():
     for especie in especies:
         print(especie)
 
+# Función para obtener y almacenar datos de planetas
 def get_planets(films_data):
     url = "https://www.swapi.tech/api/planets"
     response = rq.get(url)
@@ -121,10 +129,12 @@ def get_planets(films_data):
 
         planetas.append(planeta_obj)
 
+# Función para mostrar los planetas almacenados
 def show_planets():
     for planeta in planetas:
         print(planeta)
 
+# Función para obtener y almacenar datos de personajes
 def get_characters(films_data):
     url = "https://www.swapi.tech/api/people"
     response = rq.get(url)
@@ -205,15 +215,44 @@ def get_characters(films_data):
 
         personajes.append(personaje)
 
+# Función para buscar y mostrar personajes por nombre
 def search_character():
     name = input("Busqueda del personaje: ")
     results = [personaje for personaje in personajes if name.lower() in personaje.nombre.lower()]
     for personaje in results:
         print(personaje)
 
-if __name__ == "__main__":
-    films_data = get_films()
-    species_data = get_species(films_data)
-    get_planets(films_data)
-    get_characters(films_data)
-    search_character()
+# Función para mostrar el menú de la aplicación y manejar la selección del usuario
+def menuApp():
+    print("1. Listar peliculas")
+    print("2. Listar especies")
+    print("3. Listar planetas")
+    print("4. Listar personajes")
+    print("5. Buscar personaje")
+    print("6. Salir")
+
+    option = input("Seleccione una opcion: ")
+    while option not in ['1', '2', '3', '4', '5', '6']:
+        option = input("Seleccione una opcion valida: ")
+
+    if option == '1':
+        get_films()
+        show_films()
+    elif option == '2':
+        films_data = get_films()
+        get_species(films_data)
+        show_species()
+    elif option == '3':
+        films_data = get_films()
+        get_planets(films_data)
+        show_planets()
+    elif option == '4':
+        films_data = get_films()
+        get_characters(films_data)
+    elif option == '5':
+        films_data = get_films()
+        get_characters(films_data)
+        search_character()
+    elif option == '6':
+        print("Saliendo del menu de los API")
+        exit()
